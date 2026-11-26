@@ -113,11 +113,33 @@ def _all_tools(session):
             yield tu
 
 
+def _low_information(fp: str) -> bool:
+    """A fingerprint that names no symptom: ``Traceback``, ``Exit code N``, ``pg.on``.
+
+    Such a title tells the reader nothing, and the page would just list every session
+    that ever failed at all. A lone ``SyntaxError`` / ``ECONNREFUSED`` is still a symptom.
+    """
+    f = re.sub(r"<n>", "n", fp or "")
+    f = re.sub(r"\([^)]*\)?", " ", f).strip(" :.-").lower()
+    f = re.sub(r"\s+", " ", f)
+    if f in {"traceback", "traceback most recent call last", "exit code n", "exit code",
+             "error", "failed", "fatal", ""}:
+        return True
+    if re.match(r"^exit code:? n\b", f) and len(f.split()) <= 4:
+        return True
+    # source code that merely *mentions* an error word (``pg.on("console", lambda m: ...``)
+    if re.search(r"\b\w+\.\w+\(\s*[\"']|\blambda\b|=>", (fp or "").lower()):
+        return True
+    if len(f.split()) < 2 and not re.search(r"error|exception|econn|eacces|enoent|eperm|timeout", f):
+        return True
+    return False
+
+
 def _errors_of(texts) -> List[tuple]:
     out, seen = [], set()
     for line in error_lines(texts):
         fp = fingerprint(line)
-        if not fp or fp in seen:
+        if not fp or fp in seen or _low_information(fp):
             continue
         seen.add(fp)
         out.append((fp, line[:400]))
@@ -221,7 +243,13 @@ _GENERIC_DIRS = {
     # scratch spaces and throwaway output: the session ran *somewhere*, that is all it says
     "preview", "review", "renders", "render", "scratch", "sandbox", "experiments",
     "sheet", "seen", "dialogue", "conversation", "对话记录", "临时", "草稿",
+    # OS / browser / installer plumbing that sessions touch but never *work on*
+    "appdata", "chrome-profile", "state", "globalstorage", "program", "program files",
+    "program files (x86)", "windowsapps", "local", "roaming", "programdata",
 }
+
+#: auto-generated task / job ids (``b08k6i984``): letters mixed with digits, no separators
+_RANDOM_ID = re.compile(r"^(?=[a-z0-9]*\d)(?=[a-z0-9]*[a-z])[a-z0-9]{8,14}$", re.I)
 
 
 def _split_oversized(projects: List[Project], factsmap: Dict[str, SessionFacts], threshold: int) -> List[Project]:
@@ -553,6 +581,9 @@ def _is_code_topic(name: str) -> bool:
     if bare in _SHELL_HEADS or bare in _GENERIC_DIRS:
         return False
     if head.lower().endswith(_ARTIFACT_EXT):
+        return False
+    # a random job id anywhere in the path (``tasks/b08k6i984``) is not a subject
+    if any(_RANDOM_ID.match(p.strip()) for p in parts):
         return False
     # a trailing generic part (``.../1``, ``.../config``) is filler, not a subject
     for p in parts[1:]:

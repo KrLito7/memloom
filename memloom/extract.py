@@ -60,7 +60,7 @@ _ERROR_PAT = re.compile(
     r"|\bTraceback \(most recent call last\)"
     r"|\bfatal:"
     r"|\bERR_[A-Z0-9_]+\b"
-    r"|\bE(?:CONN|ACCES|NOENT|PERM|EXIST|ADDRINUSE|PIPE|TIMEDOUT)\b"
+    r"|\bE(?:CONN[A-Z]*|ACCES|NOENT|PERM|EXIST|ADDRINUSE|PIPE|TIMEDOUT|NOTFOUND|HOSTUNREACH)\b"
     r"|\bexit code:?\s*[1-9]\d*\b"
     r"|\b(?:failed to|unable to|cannot find|cannot open|cannot read|cannot load"
     r"|not found|not defined|is not a function|permission denied|command not found"
@@ -198,6 +198,19 @@ def extract_commands(texts: Iterable[str], tool_names: Iterable[str] = ()) -> Co
 
 # ---------------------------------------------------------------- errors
 
+#: lines that look like errors but carry no symptom worth a page: the user's own decisions,
+#: bare exit codes / traceback headers, and PowerShell's error-record wrapper
+_NOT_A_BUG = re.compile(
+    r"^(?:"
+    r"\+?\s*categoryinfo\b.*"
+    r"|\+?\s*fullyqualifiederrorid\b.*"
+    r")$",
+    re.I,
+)
+#: the user declining a tool call is a decision, not a failure — wherever it sits in the line
+_USER_DECISION = re.compile(r"\bthe user (?:cancelled|canceled|rejected|denied|doesn't want)\b", re.I)
+
+
 def is_error_line(line: str) -> bool:
     """True for a *failure message*, not for prose that merely mentions failure.
 
@@ -210,6 +223,8 @@ def is_error_line(line: str) -> bool:
     if not (6 <= len(s) <= 200):
         return False
     if len(_PROSE_HINT.findall(s)) >= 2:
+        return False
+    if _NOT_A_BUG.match(s) or _USER_DECISION.search(s):
         return False
     if s.count(" ") > 40:
         return False

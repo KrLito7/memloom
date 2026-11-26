@@ -93,3 +93,33 @@ class SignatureTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class NoiseFilterTests(unittest.TestCase):
+    def test_user_decisions_and_bare_codes_are_not_bugs(self):
+        from memloom.extract import is_error_line
+        for line in ("the user cancelled", "The user rejected tool use",
+                     "+ CategoryInfo : ParserError"):
+            self.assertFalse(is_error_line(line), line)
+
+    def test_real_errors_still_count(self):
+        from memloom.extract import is_error_line
+        for line in ("ModuleNotFoundError: No module named 'x'", "fatal: not a git repository",
+                     "connect ECONNREFUSED 127.0.0.1:8080"):
+            self.assertTrue(is_error_line(line), line)
+
+    def test_random_job_ids_and_plumbing_are_not_code_topics(self):
+        from memloom.group import _is_code_topic
+        for name in ("tasks／b08k6i984", "AppData／Local", "chrome-profile／Default",
+                     "Program Files"):
+            self.assertFalse(_is_code_topic(name), name)
+        self.assertTrue(_is_code_topic("dafeiyu／film"))
+
+
+class LowInformationTests(unittest.TestCase):
+    def test_symptomless_fingerprints_are_dropped(self):
+        from memloom.group import _low_information
+        for fp in ("Traceback", "Exit code N", "Exit code <n>", "pg.on", '<n> pg.on("console", lambda m: m.type)'):
+            self.assertTrue(_low_information(fp), fp)
+        for fp in ("SyntaxError", "ECONNREFUSED", "No such file or directory"):
+            self.assertFalse(_low_information(fp), fp)
