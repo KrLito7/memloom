@@ -46,7 +46,7 @@ def scan(roots: Optional[Sequence[Tuple[str, str]]] = None,
     """Return ``[(adapter_name, path)]`` for every archive worth reading.
 
     ``roots`` defaults to each adapter's standard location. ``only`` restricts the scan
-    to one adapter (``"dsh"`` / ``"claude-code"`` / ``"codex"``).
+    to one adapter (``"dsh"`` / ``"claude-code"`` / ``"codex"`` / ``"antigravity"``).
     """
     pairs: List[Tuple[str, str]] = []
     for name, root in roots or all_default_roots():

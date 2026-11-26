@@ -238,7 +238,7 @@ def build_parser() -> argparse.ArgumentParser:
     b = sub.add_parser("build", help="生成记忆库")
     b.add_argument("--out", "-o", default="vault", help="输出目录（默认 ./vault）")
     b.add_argument("--root", action="append", help="额外的采集路径，可多次；支持 name=PATH")
-    b.add_argument("--adapter", default="auto", help="auto | dsh | claude-code | codex")
+    b.add_argument("--adapter", default="auto", help="auto | dsh | claude-code | codex | antigravity")
     b.add_argument("--since", type=int, default=None, help="只要最近 N 天有活动的会话")
     b.add_argument("--min-turns", type=int, default=1, help="少于 N 轮的会话不要（默认 1）")
     b.add_argument("--split", type=int, default=12, help="同一工作目录超过 N 个会话才尝试拆子项目（默认 12）")

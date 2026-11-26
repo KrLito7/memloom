@@ -217,6 +217,8 @@ def guess_kind(path: str) -> str:
         return "claude-code"
     if ".codex" in p and "sessions" in p:
         return "codex"
+    if ".gemini" in p and "antigravity" in p:
+        return "antigravity"
     return ""
 
 

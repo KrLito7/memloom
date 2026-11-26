@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 from typing import List, Optional
 
+from .antigravity import AntigravityAdapter
 from .base import Adapter, guess_kind
 from .claude_code import ClaudeCodeAdapter
 from .codex import CodexAdapter
@@ -12,7 +13,7 @@ from .dsh import DshAdapter
 
 __all__ = ["Adapter", "ADAPTERS", "get_adapter", "detect_adapter", "all_default_roots", "adapter_names"]
 
-ADAPTERS: List[Adapter] = [DshAdapter(), ClaudeCodeAdapter(), CodexAdapter()]
+ADAPTERS: List[Adapter] = [DshAdapter(), ClaudeCodeAdapter(), CodexAdapter(), AntigravityAdapter()]
 
 
 def adapter_names() -> List[str]:

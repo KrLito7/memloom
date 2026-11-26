@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "memloom"
-version = "0.1.3"
+version = "0.1.4"
 description = "Turn your AI coding sessions into a navigable Obsidian memory vault. Zero dependencies."
 readme = "README.md"
 requires-python = ">=3.9"

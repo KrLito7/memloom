@@ -1,5 +1,19 @@
 # 更新日志
 
+## v0.1.4 — 2026-11-26
+
+**新增 Google Antigravity 适配器**
+
+你和 Antigravity 的对话以前进不了记忆库：它的档案格式没人认。现在 memloom build 会自动读 ~/.gemini/antigravity/brain/*/.system_generated/logs/transcript.jsonl，每个对话一页，和另外三种来源一起聚类。
+
+- 只读 	ranscript.jsonl；同目录的 	ranscript_full.jsonl 是未截断的副本，读了会让每个对话出现两次，所以只按路径识别、不做内容嗅探。
+- 用户的话取 <USER_REQUEST> 里的部分，框架附加的元数据和 SYSTEM_MESSAGE 提醒不进正文。
+- 工具结果没有 call id，按顺序和未回应的调用配对；失败判定复用现有的报错规则。
+- 档案没有标题和工作目录：标题取第一条像样的提问，工作目录显示「未知」。
+- 真实数据验证：本机 9 个 Antigravity 对话，其中包括生成这条更新的那一个，11 条提问和工具用量都正确进了库。
+
+新增 4 个测试（共 79 个）。
+
 ## v0.1.3 — 2026-11-26
 
 **主题页里的假货少了一批**

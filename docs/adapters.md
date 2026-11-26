@@ -64,6 +64,17 @@ class MyTool(Adapter):
 
 ⚠️ 本机没有 Codex 档案，这个适配器**只用合成 fixture 验证过**。真跑出问题请开 issue 贴一段脱敏后的 rollout。
 
+### Antigravity
+
+`~/.gemini/antigravity/brain/<对话 id>/.system_generated/logs/transcript.jsonl`，一行一步，按 `step_index` 排序：
+
+- `USER_INPUT` → 用户的话（去掉 `<USER_REQUEST>` 包装和 `ADDITIONAL_METADATA` 等附加块）
+- `PLANNER_RESPONSE` → 模型回复，`tool_calls` 里是工具调用
+- `GENERIC` → 工具输出；档案里**没有 call id**，所以按顺序和尚未回应的调用配对
+- `SYSTEM_MESSAGE` → 框架提醒，跳过
+
+同目录的 `transcript_full.jsonl` 是同一份内容的未截断版本，**不读**，否则每个对话都会算两次；因此这个适配器只按路径识别，不做内容嗅探。没有标题字段，标题取第一条像样的提问。工作目录档案里没有，显示「未知」。
+
 ## 测试怎么加
 
 `tests/fixtures/` 里的样本是从**真实档案裁剪**出来的（按事件类型采样 + 截断长文本），不是手编的假数据。加新适配器时配一个 `<name>-session.jsonl` fixture，然后在 `tests/test_adapters.py` 里加两件事：能被 `detect_adapter` 认出来，以及 `load` 出来的轮数/工具数对得上。

@@ -15,7 +15,7 @@
 
 ## 这是什么
 
-你每天都在跟 AI 写代码。DSH、Claude Code、Codex 把每次对话都存成了本地档案 —— 但它们是一堆 `.zstd`、`.jsonl`，散在若干个隐藏目录里。**这些档案里装着你解决问题的全部过程，却几乎不可能被再次读到。**
+你每天都在跟 AI 写代码。DSH、Claude Code、Codex、Antigravity 把每次对话都存成了本地档案 —— 但它们是一堆 `.zstd`、`.jsonl`，散在若干个隐藏目录里。**这些档案里装着你解决问题的全部过程，却几乎不可能被再次读到。**
 
 memloom 把这些档案读成一本 Obsidian 库：
 
@@ -163,7 +163,7 @@ pip install -e ".[zstd]"      # 顺手装 pyzstd，解压更快（不是必需�
 | `memloom build --verbose` | 连命中缓存的文件也回显（默认只回显本次真正解析的那几个） |
 | `memloom build --quiet` | 一个文件都不回显，只留汇总 |
 
-`--adapter auto|dsh|claude-code|codex` 强制指定某个适配器（默认按文件特征自动判断）。
+`--adapter auto|dsh|claude-code|codex|antigravity` 强制指定某个适配器（默认按文件特征自动判断）。
 
 ### 第二次跑为什么快
 
@@ -196,7 +196,8 @@ $ memloom build --out vault        # 再跑一次，其中一份还在长
 |---|---|---|
 | **DSH** | `~/.dsh/sessions/**/*.zstd` | ✅ 已验证（本机 111 个真实档案 / 106 MB） |
 | **Claude Code** | `~/.claude/projects/<project>/*.jsonl` | ✅ 已验证（本机 27 个真实文件 / 220 MB，最大一个 120 MB） |
-| **Codex** | `~/.codex/sessions/**/*.jsonl` | ⚠️ beta：适配器按已知格式写好，但本机没有 Codex 档案，**未经真实数据验证** |
+| **Codex** | `~/.codex/sessions/**/*.jsonl` | ⚠️ beta：适配器按已知格式写好；本机现有 29 个 Codex 档案，但尚未逐个核对解析结果 |
+| **Google Antigravity** | `~/.gemini/antigravity/brain/<对话 id>/.system_generated/logs/transcript.jsonl` | ✅ 已在本机真实对话上验证（只读 `transcript.jsonl`，`transcript_full.jsonl` 是同一份的未截断副本，会被忽略） |
 
 DSH 的 `.zstd` 是多 frame 拼接的老格式，标准库解不开。memloom 按顺序尝试：`pyzstd` → Python 3.14+ 的 `compression.zstd` → 本机 `node` 的 `zlib.zstdDecompressSync` → `zstd` 命令行；四条路都不通时给一句能照做的报错，而不是 traceback。
 
@@ -263,7 +264,7 @@ python tools/preflight.py
 
 ## 路线图
 
-- **v0.1**（本仓库）：三种适配器、规则抽取、项目/主题聚类、vault 渲染、增量解析（`.memloom/` 状态 + 解析缓存）、`doctor` / `scan` / `build`。
+- **v0.1**（本仓库）：四种适配器（DSH / Claude Code / Codex / Antigravity）、规则抽取、项目/主题聚类、vault 渲染、增量解析（`.memloom/` 状态 + 解析缓存）、`doctor` / `scan` / `build`。
 - **v0.2**：`--enrich` 可选的 LLM 主题命名、更多来源（Cursor、Gemini CLI、Copilot）、跨机器共享缓存。
 - **v0.3**：把「同一个 bug 在三个项目里复发过」这类跨项目线索自动挖出来。
 
