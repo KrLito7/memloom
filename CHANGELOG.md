@@ -1,5 +1,17 @@
 # 更新日志
 
+## v0.1.3 — 2026-11-26
+
+**主题页里的假货少了一批**
+
+用本机 176 个真实会话重建时，主题页里混着一批"不是主题"的页面。这一版只做降噪，不改输出格式：
+
+- `ECONNREFUSED`、`ECONNRESET` 这类错误码识别不出来：规则只认裸的 `ECONN`。现在能认。
+- 用户自己拒绝、取消工具调用（`the user cancelled` / `rejected`）被当成报错，凑出了「踩坑」页。现在不算。PowerShell 的 `CategoryInfo` / `FullyQualifiedErrorId` 包装行同理。
+- `Traceback`、`Exit code N`、`pg.on("console", lambda …)` 这类没有症状的指纹，页面里只会堆满"出过错的会话"，标题什么也说明不了。现在不建页。
+- `tasks/b08k6i984` 这类随机任务 ID，以及 `AppData`、`chrome-profile`、`Program Files` 等系统目录，不再生成「代码」页。
+
+新增 4 个回归测试（共 75 个）。
 ## v0.1.2 — 2026-11-18
 
 **页面标题停在括号中间**
